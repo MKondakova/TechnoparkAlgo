@@ -6,20 +6,6 @@
 #include <iostream>
 #include <sstream>
 
-int binary_search(int start, int end, int elem, int *A) {
-  while (start - end > 1) {
-    int delta = (end - start) / 2;
-    int m1 = start + delta;
-    int m2 = end - delta;
-    if (A[m1] <= elem) {
-      start = m1;
-    } else {
-      end = m2;
-    }
-  }
-  //случай, если серединой отсекся правильный ответ
-  return abs(A[start] - elem) > abs(elem - A[end]) ? end : start;
-}
 int find_min_index_of_closer_for_elem(int *A, int elem, int n) {
   int index = 1;
   // ищем диапазон, в котором находится ближайшие по значению к elem числа
@@ -34,7 +20,15 @@ int find_min_index_of_closer_for_elem(int *A, int elem, int n) {
     end = index;
   }
   // ищем сам индекс
-  return binary_search(start, end, elem, A);
+  while (end - start > 1) {
+    int middle = start + (end - start) / 2;
+    if (A[middle] <= elem) {
+      start = middle;
+    } else {
+      end = middle;
+    }
+  }
+  return abs(A[start] - elem) > abs(elem - A[end]) ? end : start;
 }
 void run(std::istream &input, std::ostream &output) {
   int n = 0;
@@ -49,16 +43,11 @@ void run(std::istream &input, std::ostream &output) {
   for (int i = 0; i < m; ++i) {
     input >> B[i];
   }
-  int *result = new int[m];
   for (int i = 0; i < m; ++i) {
-    result[i] = find_min_index_of_closer_for_elem(A, B[i], n);
-  }
-  for (int i = 0; i < m; ++i) {
-    output << result[i] << " ";
+    output << find_min_index_of_closer_for_elem(A, B[i], n) << " ";
   }
   delete[] A;
   delete[] B;
-  delete[] result;
 }
 void test() {
   // один элемент меньше минимального, другой больше максимального
@@ -92,11 +81,40 @@ void test() {
     run(input, output);
     assert(output.str() == "0 ");
   }
-
+  {
+    std::stringstream input;
+    std::stringstream output;
+    input << "5\n"
+             "13 15 27 34 54\n"
+             "6\n"
+             "2 72 27 30 90 53";
+    run(input, output);
+    assert(output.str() == "0 4 2 2 4 4 ");
+  }
+  {
+    std::stringstream input;
+    std::stringstream output;
+    input << "6\n"
+             "1 15 26 33 54 78\n"
+             "7\n"
+             "2 72 27 30 90 53 5";
+    run(input, output);
+    assert(output.str() == "0 5 2 3 5 4 0 ");
+  }
+  {
+    std::stringstream input;
+    std::stringstream output;
+    input << "9\n"
+             "33 39 57 60 67 77 78 79 88\n"
+             "10\n"
+             "79 33 57 88 99 67 60 20 77 79";
+    run(input, output);
+    assert(output.str() == "7 0 2 8 8 4 3 0 5 7 ");
+  }
 }
 
 int main() {
-   // run(std::cin, std::cout);
+  //run(std::cin, std::cout);
   test();
   return 0;
 }
