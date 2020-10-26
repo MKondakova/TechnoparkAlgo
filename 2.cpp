@@ -6,6 +6,18 @@
 #include <iostream>
 #include <sstream>
 
+int binary_search(int start, int end, int elem, int *A) {
+  while (end - start > 1) {
+    int middle = start + (end - start) / 2;
+    if (A[middle] <= elem) {
+      start = middle;
+    } else {
+      end = middle;
+    }
+  }
+  return abs(A[start] - elem) > abs(elem - A[end]) ? end : start;
+}
+
 int find_min_index_of_closer_for_elem(int *A, int elem, int n) {
   int index = 1;
   // ищем диапазон, в котором находится ближайшие по значению к elem числа
@@ -20,15 +32,7 @@ int find_min_index_of_closer_for_elem(int *A, int elem, int n) {
     end = index;
   }
   // ищем сам индекс
-  while (end - start > 1) {
-    int middle = start + (end - start) / 2;
-    if (A[middle] <= elem) {
-      start = middle;
-    } else {
-      end = middle;
-    }
-  }
-  return abs(A[start] - elem) > abs(elem - A[end]) ? end : start;
+  return binary_search(start, end, elem, A);;
 }
 void run(std::istream &input, std::ostream &output) {
   int n = 0;
@@ -61,16 +65,7 @@ void test() {
     run(input, output);
     assert(output.str() == "0 0 2 ");
   }
-  {
-    std::stringstream input;
-    std::stringstream output;
-    input << "3\n"
-             "10 20 30\n"
-             "4\n"
-             "8 9 20 32";
-    run(input, output);
-    assert(output.str() == "0 0 1 2 ");
-  }
+  //при равном расстоянии ответ - минимальный индекс
   {
     std::stringstream input;
     std::stringstream output;
@@ -81,26 +76,7 @@ void test() {
     run(input, output);
     assert(output.str() == "0 ");
   }
-  {
-    std::stringstream input;
-    std::stringstream output;
-    input << "5\n"
-             "13 15 27 34 54\n"
-             "6\n"
-             "2 72 27 30 90 53";
-    run(input, output);
-    assert(output.str() == "0 4 2 2 4 4 ");
-  }
-  {
-    std::stringstream input;
-    std::stringstream output;
-    input << "6\n"
-             "1 15 26 33 54 78\n"
-             "7\n"
-             "2 72 27 30 90 53 5";
-    run(input, output);
-    assert(output.str() == "0 5 2 3 5 4 0 ");
-  }
+  // тест с бОльшим количеством данных
   {
     std::stringstream input;
     std::stringstream output;
@@ -114,7 +90,7 @@ void test() {
 }
 
 int main() {
-  //run(std::cin, std::cout);
-  test();
+  run(std::cin, std::cout);
+  //test();
   return 0;
 }
