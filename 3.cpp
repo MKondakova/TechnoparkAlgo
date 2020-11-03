@@ -7,20 +7,21 @@ a = 2 - pop front
 a = 3 - push back
 a = 4 - pop back
 Команды добавления элемента 1 и 3 заданы с неотрицательным параметром b.
-Для очереди используются команды 2 и 3. Для дека используются все четыре команды.
-Если дана команда pop*, то число b - ожидаемое значение. Если команда pop вызвана для пустой структуры данных, то ожидается “-1”.
-Формат выходных данных.
-Требуется напечатать YES - если все ожидаемые значения совпали. Иначе, если хотя бы одно ожидание не оправдалось, то напечатать NO.
-Реализовать дек с динамическим зацикленным буфером.
+Для очереди используются команды 2 и 3. Для дека используются все четыре
+команды. Если дана команда pop*, то число b - ожидаемое значение. Если команда
+pop вызвана для пустой структуры данных, то ожидается “-1”. Формат выходных
+данных. Требуется напечатать YES - если все ожидаемые значения совпали. Иначе,
+если хотя бы одно ожидание не оправдалось, то напечатать NO. Реализовать дек с
+динамическим зацикленным буфером.
  */
 
 #include <cassert>
 #include <iostream>
 #include <sstream>
 
-template<class T>
+template <class T>
 class Deque {
-public:
+   public:
     Deque();
     Deque(const Deque &deque) = delete;
     ~Deque();
@@ -30,7 +31,7 @@ public:
     T popFront();
     bool isEmpty() const { return size == 0; }
 
-private:
+   private:
     int capacity;
     int size;
     T *buffer;
@@ -39,15 +40,15 @@ private:
     void expand();
 };
 
-template<class T>
+template <class T>
 Deque<T>::Deque() : capacity(0), size(0), head(0), tail(0), buffer(nullptr) {}
 
-template<class T>
+template <class T>
 Deque<T>::~Deque() {
     delete[] buffer;
 }
 
-template<class T>
+template <class T>
 void Deque<T>::pushBack(const T &value) {
     if (size == capacity) {
         expand();
@@ -56,7 +57,7 @@ void Deque<T>::pushBack(const T &value) {
     tail = (tail + 1) % capacity;
     ++size;
 }
-template<class T>
+template <class T>
 void Deque<T>::pushFront(const T &value) {
     if (size == capacity) {
         expand();
@@ -65,14 +66,14 @@ void Deque<T>::pushFront(const T &value) {
     buffer[head] = value;
     ++size;
 }
-template<class T>
+template <class T>
 T Deque<T>::popBack() {
     assert(!isEmpty());
     tail = (capacity + tail - 1) % capacity;
     --size;
     return buffer[tail];
 }
-template<class T>
+template <class T>
 T Deque<T>::popFront() {
     assert(!isEmpty());
     T value = buffer[head];
@@ -80,7 +81,7 @@ T Deque<T>::popFront() {
     --size;
     return value;
 }
-template<class T>
+template <class T>
 void Deque<T>::expand() {
     const int MIN_CAPACITY = 8;
     int newCapacity = capacity == 0 ? MIN_CAPACITY : capacity * 2;
@@ -134,7 +135,6 @@ void run(std::istream &input, std::ostream &output) {
 }
 
 void test() {
-
     {
         std::stringstream input;
         std::stringstream output;
@@ -197,6 +197,6 @@ void test() {
 
 int main() {
     run(std::cin, std::cout);
-    //test();
+    // test();
     return 0;
 }
