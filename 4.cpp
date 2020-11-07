@@ -14,6 +14,7 @@
 #include <assert.h>
 
 #include <iostream>
+#include <sstream>
 
 template <class T>
 class Heap {
@@ -26,7 +27,7 @@ class Heap {
     void insert(const T &value);
     T extractMax();
     T peekMax() const {
-        assert(isEmpty());
+        assert(!isEmpty());
         return buffer[0];
     };
 
@@ -42,17 +43,16 @@ class Heap {
     void expand();
     bool isEmpty() const { return size == 0; }
 };
-
 template <class T>
 void Heap<T>::shiftDown(size_t index) {
     size_t left = 2 * index + 1;
     size_t right = 2 * index + 2;
     size_t largest = index;
-    if (right < size && compare(buffer[largest], buffer[left])) {
-        largest = left;
-    }
-    if (left < size && compare(buffer[largest], buffer[right])) {
+    if (right < size && compare(buffer[largest], buffer[right])) {
         largest = right;
+    }
+    if (left < size && compare(buffer[largest], buffer[left])) {
+        largest = left;
     }
     if (largest != index) {
         swap(index, largest);
@@ -62,8 +62,9 @@ void Heap<T>::shiftDown(size_t index) {
 
 template <class T>
 void Heap<T>::buildHeap() {
-    for (size_t i = size / 2 - 1; i >= 0; --i) {
-        shiftDown(i);
+    size_t parent = size / 2 - 1;
+    for (size_t i = 0; i <= parent; ++i) {
+        shiftDown(parent - i);
     }
 }
 
@@ -81,7 +82,7 @@ void Heap<T>::shiftUp(size_t index) {
 template <class T>
 void Heap<T>::swap(size_t a, size_t b) {
     assert(a < size && b < size);
-    T *temp = buffer[a];
+    T temp = buffer[a];
     buffer[a] = buffer[b];
     buffer[b] = temp;
 }
@@ -111,7 +112,7 @@ void Heap<T>::expand() {
 
 template <class T>
 T Heap<T>::extractMax() {
-    assert(isEmpty());
+    assert(!isEmpty());
     T result = buffer[0];
     buffer[0] = buffer[size - 1];
     --size;
@@ -122,7 +123,7 @@ T Heap<T>::extractMax() {
 }
 template <class T>
 Heap<T>::~Heap() {
-    delete[] buffer
+    delete[] buffer;
 }
 template <class T>
 Heap<T>::Heap(bool (*compareFunc)(const T &, const T &))
@@ -135,11 +136,16 @@ Heap<T>::Heap(const T *array, size_t size,
     for (size_t i = 0; i < size; ++i) {
         buffer[i] = array[i];
     }
-    buildHeap();
+    if (size > 1) {
+        buildHeap();
+    }
 }
 
 struct elemInWindows {
-    elemInWindows() {}
+    elemInWindows() {
+        value = -1;
+        position = -1;
+    }
     elemInWindows(int _value, int _position) {
         value = _value;
         position = _position;
@@ -148,7 +154,80 @@ struct elemInWindows {
     int position;
 };
 
-int findMaxInWindow(Heap<elemInWindows> heap, int startPosition);
+int findMaxInWindow(Heap<elemInWindows> &heap, int startPosition);
 bool elemInWindowsCompare(const elemInWindows &a, const elemInWindows &b) {
     return a.value < b.value;
+}
+void run(std::istream &input, std::ostream &output) {
+    int n = 0;
+    input >> n;
+    auto *A = new elemInWindows[n];
+    for (size_t i = 0; i < n; ++i) {
+        int value = 0;
+        input >> value;
+        A[i] = elemInWindows(value, i);
+    }
+    int k = 0;
+    input >> k;
+    Heap<elemInWindows> heap(A, k, elemInWindowsCompare);
+    output << findMaxInWindow(heap, 0) << " ";
+    int nextElemPosition = k;
+    for (; nextElemPosition < n; ++nextElemPosition) {
+        heap.insert(A[nextElemPosition]);
+        output << findMaxInWindow(heap, nextElemPosition - (k - 1)) << " ";
+    }
+    delete[] A;
+}
+
+int findMaxInWindow(Heap<elemInWindows> &heap, int startPosition) {
+    while (heap.peekMax().position < startPosition) {
+        heap.extractMax();
+    }
+    return heap.peekMax().value;
+}
+
+void test() {
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "\n"
+                 "3\n"
+                 "1 2 3\n"
+                 "2";
+        run(input, output);
+        assert(output.str() == "2 3 ");
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "9\n"
+                 "0 7 3 8 4 5 10 4 6\n"
+                 "4";
+        run(input, output);
+        assert(output.str() == "8 8 8 10 10 10 ");
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "9\n"
+                 "0 7 3 8 4 5 10 4 6\n"
+                 "1";
+        run(input, output);
+        assert(output.str() == "0 7 3 8 4 5 10 4 6 ");
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "9\n"
+                 "0 7 3 8 4 5 10 4 6\n"
+                 "9";
+        run(input, output);
+        assert(output.str() == "10 ");
+    }
+}
+
+int main() {
+    run(std::cin, std::cout);
+    // test();
+    return 0;
 }
