@@ -50,13 +50,13 @@ int partition(T *a, int left, int right,
     int i = right;
     int j = i;
     while (j > 0) {
-        if (compareFunc(a[0], a[j])) {
+        if (compareFunc(a[left], a[j])) {
             swap(a, i, j);
             i--;
         }
         j--;
     }
-    swap(a, 0, i);
+    swap(a, left, i);
     return i;
 }
 template <class T>
@@ -95,6 +95,14 @@ void run(std::istream &input, std::ostream &output) {
 }
 
 void test() {
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "10 4\n"
+                 "1 2 3 4 5 6 7 8 9 10";
+        run(input, output);
+        assert(output.str() == "5");
+    }
     {
         std::stringstream input;
         std::stringstream output;
