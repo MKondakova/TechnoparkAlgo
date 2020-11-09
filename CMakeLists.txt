@@ -3,4 +3,4 @@ project(TechoparkAlgo)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_executable(TechoparkAlgo 6.cpp)
+add_executable(TechoparkAlgo modul_1/6.cpp)
