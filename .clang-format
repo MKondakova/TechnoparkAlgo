@@ -1,4 +1,6 @@
 BasedOnStyle: Google
 IndentWidth: 4
+ReflowComments: true
+SortIncludes: true
 
 Language: Cpp
