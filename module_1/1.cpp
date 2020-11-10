@@ -11,31 +11,39 @@
 #include <iostream>
 #include <sstream>
 
+struct Node {
+    explicit Node(int i) {
+        position = i;
+        next = nullptr;
+    }
+    int position;
+    Node *next;
+};
 int countdown(int N, int k) {
+    Node *list = new Node(1);
+    Node *tail = list;
+    for (int i = 2; i <= N; ++i) {
+        Node *temp = new Node(i);
+        tail->next = temp;
+        tail = temp;
+    }
+    tail->next = list;
+
     int aliveCount = N;
-    int counted = 0;
-    int *array = new int[N];
-    const int DEAD = -1;
-    const int ALIVE = 1;
-    for (int i = 0; i < N; ++i) {
-        array[i] = ALIVE;
-    }
-    for (int i = 0; aliveCount > 1; i = (i + 1) % N) {
-        if (array[i] == ALIVE) {
-            if (counted == k - 1) {
-                array[i] = DEAD;
-                counted = 0;
-                --aliveCount;
-            } else {
-                ++counted;
-            }
+    Node *current = list;
+    while (aliveCount > 1) {
+        for (int i = 1; i < k - 1; ++i) {
+            current = current->next;
         }
+        Node *temp = current->next;
+        current->next = current->next->next;
+        current = current->next;
+        delete temp;
+        --aliveCount;
     }
-    int result = 0;
-    for (; array[result] != ALIVE; ++result)
-        ;
-    delete[] array;
-    return result + 1;
+    int result = current->position;
+    delete current;
+    return result;
 }
 
 void run(std::istream &input, std::ostream &output) {
