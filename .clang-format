@@ -2,5 +2,6 @@ BasedOnStyle: Google
 IndentWidth: 4
 ReflowComments: true
 SortIncludes: true
+MaxEmptyLinesToKeep: 2
 
 Language: Cpp

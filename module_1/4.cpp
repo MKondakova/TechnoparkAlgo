@@ -27,7 +27,7 @@ class Heap {
     ~Heap();
     void insert(const T &value);
     T extractMax();
-    T peekMax() const {
+    const T& peekMax() const {
         assert(!isEmpty());
         return buffer[0];
     };
