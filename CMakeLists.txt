@@ -4,4 +4,5 @@ project(TechnoparkAlgo)
 set(CMAKE_CXX_STANDARD 14)
 
 add_subdirectory(module_1)
+
 add_subdirectory(module_2)

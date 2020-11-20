@@ -10,6 +10,7 @@
 #include <sstream>
 
 int binary_search(int start, int end, int elem, int *A) {
+
     while (end - start > 1) {
         int middle = start + (end - start) / 2;
         if (A[middle] <= elem) {
