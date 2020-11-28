@@ -24,7 +24,7 @@ class Heap {
     Heap(const T *array, size_t size,
          bool (*compareFunc)(const T &a, const T &b));
 
-    Heap(const Heap &heap) = delete;
+    Heap(const Heap &) = delete;
     ~Heap();
     void insert(const T &value);
     T extractMax();
