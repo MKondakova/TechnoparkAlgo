@@ -3,6 +3,6 @@ IndentWidth: 4
 ReflowComments: true
 SortIncludes: true
 
-MaxEmptyLinesToKeep: 2
+MaxEmptyLinesToKeep: 1
 
 Language: Cpp

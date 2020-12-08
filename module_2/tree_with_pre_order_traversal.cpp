@@ -21,7 +21,8 @@ class BinTree {
     explicit BinTree(bool (*compareFunc)(const T& a, const T& b));
     ~BinTree();
     BinTree(const BinTree&) = delete;
-    void Add(int key);
+    void Add(T key);
+    bool Delete(T key);
     void PreOrderDFS(void visit(T));
 
    private:
@@ -35,25 +36,23 @@ class BinTree {
     Node* root;
     bool (*compare)(const T& a, const T& b);
 
-    void add(Node*& node, T key);
+    void addNode(Node*& node, T key);
     void preOrderDFS(Node* node, void visit(T)) const;
     void postOrderDFS(Node* node, void visit(Node*));
+    bool deleteNode(Node*& node, T key);
 };
-
 
 template <class T>
 BinTree<T>::BinTree(bool (*compareFunc)(const T&, const T&))
     : root(nullptr), compare(compareFunc) {}
 
-
 template <class T>
-void BinTree<T>::Add(int key) {
-    add(root, key);
+void BinTree<T>::Add(T key) {
+    addNode(root, key);
 }
 
-
 template <class T>
-void BinTree<T>::add(BinTree::Node*& node, T key) {
+void BinTree<T>::addNode(BinTree::Node*& node, T key) {
     if (node == nullptr) {
         node = new Node(key);
         return;
@@ -69,12 +68,10 @@ void BinTree<T>::add(BinTree::Node*& node, T key) {
     *currentNode = new Node(key);
 }
 
-
 template <class T>
 void BinTree<T>::PreOrderDFS(void (*visit)(T)) {
     preOrderDFS(root, visit);
 }
-
 
 template <class T>
 void BinTree<T>::preOrderDFS(BinTree::Node* node, void (*visit)(T)) const {
@@ -96,7 +93,6 @@ void BinTree<T>::preOrderDFS(BinTree::Node* node, void (*visit)(T)) const {
         }
     }
 }
-
 
 template <class T>
 void BinTree<T>::postOrderDFS(BinTree::Node* node, void (*visit)(Node*)) {
@@ -126,22 +122,51 @@ void BinTree<T>::postOrderDFS(BinTree::Node* node, void (*visit)(Node*)) {
     } while (!visitStack.empty());
 }
 
-
 template <class T>
 BinTree<T>::~BinTree() {
     postOrderDFS(root, [](Node* node) { delete node; });
 }
 
+template <class T>
+bool BinTree<T>::Delete(T key) {
+    return deleteNode(root, key);
+}
+
+template <class T>
+bool BinTree<T>::deleteNode(BinTree::Node*& node, T key) {
+    if (node == nullptr) {
+        return false;
+    }
+    Node** parent;
+    Node* currentNode = node;
+    while (currentNode != nullptr && currentNode->Key != key) {
+        parent = &currentNode;
+        if (currentNode->Key < key) {
+            currentNode = currentNode->Right;
+        } else {
+            currentNode = currentNode->Left;
+        }
+    }
+    if (currentNode == nullptr) {
+        return false;
+    } else {
+        if (parent->Key < key) {
+            parent->Right = nullptr;
+        } else {
+            parent->Left = nullptr;
+        }
+        delete currentNode;
+        return true;
+    }
+}
 
 template <class T>
 bool defaultCompare(const T& a, const T& b) {
     return a < b;
 }
 
-
 std::stringstream mainOutput;
 void stringstreamOutput(int value) { mainOutput << value << " "; }
-
 
 void run(std::istream& input, void (*visit)(int) = stringstreamOutput) {
     int n = 0;
@@ -154,7 +179,6 @@ void run(std::istream& input, void (*visit)(int) = stringstreamOutput) {
     }
     tree.PreOrderDFS(visit);
 }
-
 
 void test() {
     {
