@@ -1,9 +1,28 @@
+/** Дано число N < 106 и последовательность пар целых чисел из [-231..231]
+ * длиной N. Построить декартово дерево из N узлов, характеризующихся парами
+ * чисел {Xi, Yi}. Каждая пара чисел {Xi, Yi} определяет ключ Xi и приоритет Yi
+ * в декартовом дереве.
+ *
+ *Вычислить количество узлов в самом широком слое декартового дерева и
+ *количество узлов в самом широком слое наивного дерева поиска. Вывести их
+ *разницу. Разница может быть отрицательна.
+ *
+ */
 #include <assert.h>
 
 #include <iostream>
 #include <queue>
 #include <sstream>
 #include <stack>
+template <class P, class K>
+struct CTreeNode {
+    CTreeNode *Left;
+    CTreeNode *Right;
+    P Priority;
+    K Key;
+    CTreeNode(P priority, K key)
+        : Left(nullptr), Right(nullptr), Priority(priority), Key(key){};
+};
 
 template <class P, class K>
 class CTree {
@@ -18,85 +37,58 @@ class CTree {
    private:
     bool (*compareFuncForKeys_)(const K &a, const K &b);
     bool (*compareFuncForPriorities_)(const P &a, const P &b);
-    struct CTreeNode {
-        CTreeNode *Left;
-        CTreeNode *Right;
-        P Priority;
-        K Key;
-        CTreeNode(P priority, K key)
-            : Left(nullptr), Right(nullptr), Priority(priority), Key(key){};
-    };
-    CTreeNode *root;
-    void postOrderDFS(CTreeNode *node, void visit(CTreeNode *));
-    void add(P priority, K key, CTreeNode *&node);
-    void Split(CTreeNode *currentNode, K key, CTreeNode *&left,
-               CTreeNode *&right);
-    void Merge(CTree::CTreeNode *left, CTree::CTreeNode *right,
-               CTree::CTreeNode *&result);
+
+    CTreeNode<P, K> *root;
+    void postOrderDFS(CTreeNode<P, K> *node, void visit(CTreeNode<P, K> *));
+    void add(P priority, K key, CTreeNode<P, K> *&node);
+    void Split(CTreeNode<P, K> *currentNode, K key, CTreeNode<P, K> *&left,
+               CTreeNode<P, K> *&right);
+    CTreeNode<P, K> Merge(CTreeNode<P, K> *left, CTreeNode<P, K> *right);
 };
 
 template <class P, class K>
-void CTree<P, K>::postOrderDFS(CTree::CTreeNode *node,
-                               void (*visit)(CTreeNode *)) {
+void CTree<P, K>::postOrderDFS(CTreeNode<P, K> *node,
+                               void (*visit)(CTreeNode<P, K> *)) {
     if (node == nullptr) {
         return;
     }
-    std::stack<CTreeNode *> visitStack;
-    CTreeNode *currentNode = node;
-    do {
-        while (currentNode != nullptr) {
-            if (currentNode->Right != nullptr) {
-                visitStack.push(currentNode->Right);
-            }
-            visitStack.push(currentNode);
-            currentNode = currentNode->Left;
-        }
-        currentNode = visitStack.top();
-        visitStack.pop();
-        if (!visitStack.empty() && currentNode->Right == visitStack.top()) {
-            visitStack.pop();
-            visitStack.push(currentNode);
-            currentNode = currentNode->Right;
-        } else {
-            visit(currentNode);
-            currentNode = nullptr;
-        }
-    } while (!visitStack.empty());
+    postOrderDFS(node->Left, visit);
+    postOrderDFS(node->Right, visit);
+    visit(node);
 }
 
-template <class T, class K>
-void CTree<T, K>::Split(CTree::CTreeNode *currentNode, K key,  // todo
-                        CTree::CTreeNode *&left, CTree::CTreeNode *&right) {
-    if (currentNode == nullptr) {
+template <class P, class K>
+void CTree<P, K>::Split(CTreeNode<P, K> *currentNode, K key,
+                        CTreeNode<P, K> *&left, CTreeNode<P, K> *&right) {
+    if (!currentNode) {
         left = nullptr;
         right = nullptr;
-        return;
+    } else if (!compareFuncForKeys_(key, currentNode->Key)) {
+        Split(currentNode->Right, key, currentNode->Right, right);
+        left = currentNode;
+    } else {
+        Split(currentNode->Left, key, left, currentNode->Left);
+        right = currentNode;
     }
 }
 
 template <class P, class K>
-void CTree<P, K>::Merge(CTree::CTreeNode *left, CTree::CTreeNode *right,
-                        CTree::CTreeNode *&result) {
-    CTreeNode **current_root;
-    current_root = result;  //вот тут не нравится момент с передачей по ссылке
-    while (right != nullptr && left != nullptr) {
-        if (compareFuncForPriorities_(right->Priority, left->Priority)) {
-            *current_root = left;
-            current_root = &(left->Right);
-            left = left->Right;
-        } else {
-            *current_root = right;
-            current_root = &(right->Left);
-            right = right->Left;
-        }
+CTreeNode<P, K> CTree<P, K>::Merge(CTreeNode<P, K> *left,
+                                   CTreeNode<P, K> *right) {
+    if (left == nullptr) return right;
+    if (right == nullptr) return left;
+    if (compareFuncForPriorities_(right->Priority, left->Priority)) {
+        left->Right = Merge(left->Right, right);
+        return left;
+    } else {
+        right->Left = Merge(left, right->Left);
+        return right;
     }
-    if (left == nullptr) *current_root = right;
-    if (right == nullptr) *current_root = left;
 }
 
 template <class P, class K>
 CTree<P, K>::~CTree() {
-    postOrderDFS(root, [](CTreeNode *node) { delete node; });
+    postOrderDFS(root, [](CTreeNode<P, K> *node) { delete node; });
 }
 
 template <class P, class K>
@@ -105,34 +97,23 @@ void CTree<P, K>::Add(P priority, K key) {
 }
 
 template <class P, class K>
-void CTree<P, K>::add(P priority, K key, CTree::CTreeNode *&node) {
+void CTree<P, K>::add(P priority, K key, CTreeNode<P, K> *&node) {
     if (node == nullptr) {
-        node = new CTreeNode(priority, key);
+        node = new CTreeNode<P, K>(priority, key);
         return;
     }
-    CTreeNode *parent = nullptr;
-    CTreeNode *currentNode = node;
-    while (currentNode != nullptr &&
-           !compareFuncForPriorities_(currentNode->Priority, priority)) {
-        parent = currentNode;
-        if (compareFuncForKeys_(currentNode->Key, key)) {
-            currentNode = currentNode->Right;
+    if (compareFuncForPriorities_(node->Priority, priority)) {
+        CTreeNode<P, K> *newNode = new CTreeNode<P, K>(priority, key);
+        Split(node, key, newNode->Left, newNode->Right);
+        node = newNode;
+    } else {
+        if (compareFuncForKeys_(key, node->Key)) {
+            add(priority, key, node->Left);
         } else {
-            currentNode = currentNode->Left;
+            add(priority, key, node->Right);
         }
     }
-    CTreeNode *left, *right;
-    Split(currentNode, key, left, right);
-    CTreeNode *newNode = new CTreeNode(priority, key);
-    newNode->Left = left;
-    newNode->Right = right;
-    if (compareFuncForKeys_(parent->Key, key)) {
-        parent->Right = newNode;
-    } else {
-        parent->Left = newNode;
-    }
 }
-
 
 template <class P, class K>
 CTree<P, K>::CTree(bool (*compareFuncForKeys)(const K &, const K &),
@@ -280,15 +261,6 @@ void test() {
     {
         std::stringstream input;
         std::stringstream output;
-        input << "2\n"
-                 "5 11\n"
-                 "18 8";
-        run(input, output);
-        assert(output.str() == "0");
-    }
-    /*{
-        std::stringstream input;
-        std::stringstream output;
         input << "10\n"
                  "5 11\n"
                  "18 8\n"
@@ -302,10 +274,28 @@ void test() {
                  "45 9";
         run(input, output);
         assert(output.str() == "1");
-    }*/
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "10\n"
+                 "38 19\n"
+                 "37 5\n"
+                 "47 15\n"
+                 "35 0\n"
+                 "12 3\n"
+                 "0 42\n"
+                 "31 37\n"
+                 "21 45\n"
+                 "30 26\n"
+                 "41 6";
+        run(input, output);
+        assert(output.str() == "1");
+    }
 }
 
 int main() {
-    test();
+    run(std::cin, std::cout);
+    // test();
     return 0;
 }
