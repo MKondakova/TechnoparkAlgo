@@ -52,9 +52,27 @@ void CTree<P, K>::postOrderDFS(CTreeNode<P, K> *node,
     if (node == nullptr) {
         return;
     }
-    postOrderDFS(node->Left, visit);
-    postOrderDFS(node->Right, visit);
-    visit(node);
+    std::stack<CTreeNode<P, K>*> visitStack;
+    CTreeNode<P, K> *currentNode = node;
+    do {
+        while (currentNode != nullptr) {
+            if (currentNode->Right != nullptr) {
+                visitStack.push(currentNode->Right);
+            }
+            visitStack.push(currentNode);
+            currentNode = currentNode->Left;
+        }
+        currentNode = visitStack.top();
+        visitStack.pop();
+        if (!visitStack.empty() && currentNode->Right == visitStack.top()) {
+            visitStack.pop();
+            visitStack.push(currentNode);
+            currentNode = currentNode->Right;
+        } else {
+            visit(currentNode);
+            currentNode = nullptr;
+        }
+    } while (!visitStack.empty());
 }
 
 template <class P, class K>
@@ -296,6 +314,6 @@ void test() {
 
 int main() {
     run(std::cin, std::cout);
-    // test();
+    //test();
     return 0;
 }
