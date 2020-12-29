@@ -2,6 +2,7 @@
 #include "graph_interface.h"
 
 class MatrixGraph : public IGraph {
+   public:
     explicit MatrixGraph(int vertex_number);
     explicit MatrixGraph(const IGraph& graph);
     void AddEdge(int from, int to) override;

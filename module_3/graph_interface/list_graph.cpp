@@ -2,11 +2,11 @@
 
 ListGraph::ListGraph(int vertex_number) : adjacency_lists(vertex_number) {}
 
-ListGraph::ListGraph(const IGraph& graph) {
+ListGraph::ListGraph(const IGraph& graph)
+    : adjacency_lists(graph.VerticesCount()) {
     int vertex_count = graph.VerticesCount();
-    adjacency_lists(vertex_number);
     for (int i = 0; i < vertex_count; ++i) {
-        vector next_vertices = graph.GetNextVertices(i);
+        std::vector<int> next_vertices = graph.GetNextVertices(i);
         for (int vertex : next_vertices) {
             adjacency_lists[i].push_back(vertex);
         }

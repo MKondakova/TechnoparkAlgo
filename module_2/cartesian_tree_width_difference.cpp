@@ -195,7 +195,6 @@ class BinTree {
     bool deleteNode(Node *&node, T key);
 };
 
-void test();
 template <class T>
 BinTree<T>::BinTree(bool (*compareFunc)(const T &, const T &))
     : root(nullptr), compare(compareFunc) {}

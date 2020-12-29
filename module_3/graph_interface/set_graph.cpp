@@ -1,11 +1,11 @@
 #include "set_graph.h"
 SetGraph::SetGraph(int vertex_number) : adjacency_lists(vertex_number) {}
 
-SetGraph::SetGraph(const IGraph& graph) {
+SetGraph::SetGraph(const IGraph& graph)
+    : adjacency_lists(graph.VerticesCount()) {
     int vertex_count = graph.VerticesCount();
-    adjacency_lists(vertex_number);
     for (int i = 0; i < vertex_count; ++i) {
-        vector next_vertices = graph.GetNextVertices(i);
+        std::vector<int> next_vertices = graph.GetNextVertices(i);
         for (int vertex : next_vertices) {
             adjacency_lists[i].insert(vertex);
         }
@@ -22,7 +22,8 @@ int SetGraph::VerticesCount() const { return adjacency_lists.size(); }
 
 std::vector<int> SetGraph::GetNextVertices(int vertex) const {
     assert(vertex >= 0 && vertex < adjacency_lists.size());
-    return std::vector<int>(adjacency_lists[vertex]);
+    return std::vector<int>(adjacency_lists[vertex].begin(),
+                            adjacency_lists[vertex].end());
 }
 
 std::vector<int> SetGraph::GetPrevVertices(int vertex) const {

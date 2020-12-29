@@ -4,7 +4,7 @@
 class ArcGraph: public IGraph {
    public:
 
-    explicit ArcGraph(int vertex_number) {}
+    explicit ArcGraph(int vertex_number);
     explicit ArcGraph(const IGraph& graph);
     void AddEdge(int from, int to) override;
     int VerticesCount() const override;
@@ -12,5 +12,6 @@ class ArcGraph: public IGraph {
     std::vector<int> GetPrevVertices(int vertex) const override;
 
    private:
+    int vertex_count;
     std::vector<std::pair<int, int>> edges;
 };
