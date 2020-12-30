@@ -15,7 +15,7 @@
 
 #include <iosfwd>
 #include <iostream>
-#include <queue>
+#include <set>
 #include <sstream>
 #include <vector>
 #define INT_MAX (2147483647)
@@ -48,27 +48,16 @@ std::vector<std::pair<int, int>> ListGraph::GetNextVertices(int vertex) const {
     return adjacency_lists[vertex];
 }
 
-bool Relax(int u, int v, int weight, std::vector<int>& parent,
-           std::vector<int>& distance) {
-    if (distance[v] > distance[u] + weight) {
-        distance[v] = distance[u] + weight;
-        parent[v] = u;
-        return true;
-    }
-    return false;
-}
 
 int Dijkstra(const ListGraph& graph, int start, int finish) {
     std::vector<int> distance(graph.VerticesCount(), INT_MAX);
     std::vector<int> parent(graph.VerticesCount(), -1);
     distance[start] = 0;
-    std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>,
-                        std::greater<std::pair<int, int>>>
-        queue;
-    queue.push(std::make_pair(0, start));
-    while (!queue.empty()) {
-        std::pair<int, int> current_vertex = queue.top();
-        queue.pop();
+    std::set<std::pair<int, int>> set;
+    set.insert(std::make_pair(0, start));
+    while (!set.empty()) {
+        std::pair<int, int> current_vertex = *set.begin();
+        set.erase(set.begin());
         if (distance[current_vertex.second] < current_vertex.first) continue;
         for (std::pair<int, int> next :
              graph.GetNextVertices(current_vertex.second)) {
@@ -76,10 +65,11 @@ int Dijkstra(const ListGraph& graph, int start, int finish) {
                 distance[next.second] =
                     distance[current_vertex.second] + next.first;
                 parent[next.second] = current_vertex.second;
-                queue.push(std::make_pair(next.first, next.second));
-            } else if (Relax(current_vertex.second, next.second, next.first,
-                             parent, distance)) {
-                queue.push(std::make_pair(distance[next.second], next.second));
+                set.insert(std::make_pair(next.first, next.second));
+            } else if (distance[current_vertex.second] + next.first < distance[next.second]) {
+                set.erase(std::make_pair(distance[next.second], next.second));
+                distance[next.second] = distance[current_vertex.second] + next.first;
+                set.insert(std::make_pair(distance[next.second], next.second));
             }
         }
     }
@@ -123,6 +113,6 @@ void test() {
 
 int main() {
     run(std::cin, std::cout);
-    // test();
+    //test();
     return 0;
 }
