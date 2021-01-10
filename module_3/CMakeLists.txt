@@ -14,3 +14,5 @@ target_link_libraries(module_3_task_1 graph_interface)
 
 add_executable(module_3_task_2 shortest_paths_count.cpp)
 target_link_libraries(module_3_task_2 graph_interface)
+
+add_executable(module_3_task_3 town_roads.cpp)
