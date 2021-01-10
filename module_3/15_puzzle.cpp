@@ -270,10 +270,20 @@ void test() {
         std::stringstream output;
         input << "1 2 3 4\n"
                  "5 6 7 8\n"
+                 "9 10 11 0\n"
+                 "13 14 15 12";
+        run(input, output);
+        assert(output.str() == "1\nU ");
+    }
+    {
+        std::stringstream input;
+        std::stringstream output;
+        input << "1 2 3 4\n"
+                 "5 6 7 8\n"
                  "9 10 11 12\n"
                  "13 15 14 0";
         run(input, output);
-        cout << output.str();
+        assert(output.str() == "-1");
     }
 
 }
